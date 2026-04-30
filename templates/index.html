@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>클립보드 서비스</title>
+    <style>
+        /* 기본 리셋 및 폰트 설정 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            background-color: #ffffff;
+            color: #202124;
+        }
+
+        /* 상단 헤더 (로고 및 검색창) */
+        header {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #5f6368;
+            margin-right: 40px;
+        }
+        .search-container {
+            flex-grow: 1;
+            max-width: 720px;
+            background-color: #f1f3f4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+        }
+        .search-container input {
+            width: 100%;
+            height: 48px;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            outline: none;
+            color: #202124;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        main {
+            padding: 32px 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 글쓰기 폼 영역 (Keep 스타일 애니메이션 포함) */
+        .create-container {
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+            padding: 12px 16px;
+            transition: box-shadow 0.2s;
+        }
+        .create-container input, .create-container textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            resize: none;
+        }
+        .create-container input {
+            font-size: 16px;
+            font-weight: bold;
+            display: none; /* 초기에는 숨김 */
+            margin-bottom: 12px;
+        }
+        .create-container textarea {
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 46px;
+            line-height: 1.5;
+            padding-top: 12px;
+        }
+        .form-actions {
+            display: none; /* 초기에는 숨김 */
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+        .form-actions button {
+            background-color: transparent;
+            border: none;
+            color: #1a73e8;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 24px;
+            border-radius: 4px;
+        }
+        .form-actions button:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 클립보드(노트) 리스트 영역 (CSS Column 형태의 Masonry 레이아웃) */
+        .notes-grid {
+            /* Grid 대신 column 속성 사용 */
+            column-count: 1; /* 모바일 기본값: 1단 */
+            column-gap: 16px; /* 단 사이의 간격 */
+        }
+
+        /* 화면 너비에 따라 열(Column) 개수를 유동적으로 조절 */
+        @media (min-width: 600px) {
+            .notes-grid { column-count: 2; }
+        }
+        @media (min-width: 900px) {
+            .notes-grid { column-count: 3; }
+        }
+        @media (min-width: 1200px) {
+            .notes-grid { column-count: 4; }
+        }
+
+        .note-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            word-wrap: break-word;
+            transition: box-shadow 0.2s;
+            
+            /* Masonry 레이아웃 핵심 설정 */
+            break-inside: avoid; /* 카드가 단 중간에 잘리는 현상 방지 */
+            margin-bottom: 16px; /* 카드 아래쪽 여백 (gap 대신 사용) */
+            display: inline-block; /* 레이아웃 틀어짐 방지 */
+            width: 100%;
+        }
+        
+        /* 기존 마우스 호버 등 기타 속성은 그대로 유지 */
+        .note-card:hover {
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .note-card h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .note-card p {
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .note-date {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 16px;
+            text-align: right;
+        }
+
+        /* 카드 내부 헤더 (제목과 버튼을 가로로 배치) */
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .note-header h3 {
+            margin-bottom: 0; /* 기존 마진 덮어쓰기 */
+            word-break: break-all;
+            padding-right: 8px;
+        }
+
+        /* 삭제 버튼 스타일 */
+        .delete-div {
+            text-align: right;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #5f6368;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: #f1f3f4;
+            color: #d93025; /* 호버 시 빨간색으로 변경 */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">클립보드</div>
+        <div class="search-container">
+            <!-- 검색 요청은 추후 JS나 Form GET 요청으로 처리할 예정입니다. -->
+            <input type="text" id="searchInput" placeholder="검색...">
+        </div>
+    </header>
+
+    <main>
+        <!-- 글 작성 폼 -->
+        <form action="/add" method="POST" id="createForm">
+            <div class="create-container" id="createContainer">
+                <input type="text" name="title" id="noteTitle" placeholder="제목">
+                <textarea name="content" id="noteContent" placeholder="메모 작성..." rows="1"></textarea>
+                <div class="form-actions" id="formActions">
+                    <button type="submit">닫기 및 저장</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- 저장된 글이 표시될 그리드 -->
+        <div class="notes-grid" id="notesGrid">
+            
+            <!-- Jinja2 for 루프 시작 -->
+            {% for note in notes %}
+            <div class="note-card">
+                <h3>{{ note.title }}</h3>
+                <p>{{ note.content }}</p>
+                <div class="delete-div">
+                    <form action="/delete" method="POST" onsubmit="return confirm('정말 이 클립보드를 삭제하시겠습니까?');">
+                        <input type="hidden" name="filename" value="{{ note.filename }}">
+                        <button type="submit" class="delete-btn" title="삭제">삭제</button>
+                    </form>
+                </div>
+                <div class="note-date">{{ note.date }}</div>
+            </div>
+            {% else %}
+            <!-- 등록된 글이 하나도 없을 때 표시할 내용 -->
+            <p style="grid-column: 1 / -1; text-align: center; color: #5f6368; padding: 40px;">
+                저장된 클립보드가 없습니다.
+            </p>
+            {% endfor %}
+            <!-- Jinja2 for 루프 끝 -->
+            
+        </div>
+    </main>
+
+    <script>
+        // Google Keep 스타일의 폼 확장 UI 스크립트
+        const createContainer = document.getElementById('createContainer');
+        const noteTitle = document.getElementById('noteTitle');
+        const noteContent = document.getElementById('noteContent');
+        const formActions = document.getElementById('formActions');
+
+        // 텍스트 영역을 클릭하면 폼이 확장됨
+        noteContent.addEventListener('focus', function() {
+            noteTitle.style.display = 'block';
+            formActions.style.display = 'flex';
+            noteContent.rows = 3;
+        });
+
+        // 폼 바깥을 클릭했을 때 내용이 비어있으면 다시 폼을 축소함
+        document.addEventListener('click', function(event) {
+            const isClickInside = createContainer.contains(event.target);
+            if (!isClickInside && noteTitle.value.trim() === '' && noteContent.value.trim() === '') {
+                noteTitle.style.display = 'none';
+                formActions.style.display = 'none';
+                noteContent.rows = 1;
+            }
+        });
+    </script>
+</body>
+</html>
