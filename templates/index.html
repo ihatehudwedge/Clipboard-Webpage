@@ -192,16 +192,137 @@
             background-color: #f1f3f4;
             color: #d93025; /* 호버 시 빨간색으로 변경 */
         }
+
+        /* 검색 버튼 스타일 */
+        .search-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background-color 0.2s;
+
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .search-btn:hover {
+            background-color: #1557b0;
+        }
+
+        /* 도구 설치 버튼 스타일 */
+        .tool-install-btn {
+            background-color: transparent;
+            border: 1px solid #dadce0;
+            color: #1a73e8;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-left: 24px; /* 검색창과의 간격 */
+            transition: background-color 0.2s, border-color 0.2s;
+            white-space: nowrap; /* 화면이 좁아져도 글자가 줄바꿈되지 않도록 방지 */
+        }
+        
+        .tool-install-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+        }
+
+        .caution-message{
+            color: #fa1e0f;
+            font-size: 13px;
+            font-style: italic;
+            margin-left: 100px;
+        }
+
+        /* 다크모드 토글 버튼 기본 스타일 */
+        .dark-mode-btn {
+            background-color: transparent;
+            border: 1px solid #dadce0;
+            color: #5f6368;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-left: 12px;
+            transition: background-color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .dark-mode-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* ================= 다크모드 전용 스타일 ================= */
+        body.dark-mode {
+            background-color: #202124;
+            color: #e8eaed;
+        }
+        body.dark-mode header {
+            background-color: #202124;
+            border-bottom: 1px solid #5f6368;
+        }
+        body.dark-mode .logo { color: #e8eaed; }
+        
+        body.dark-mode .search-container { background-color: #525355; }
+        body.dark-mode .search-container input { color: #e8eaed; }
+        
+        body.dark-mode .create-container {
+            background-color: #202124;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.6), 0 2px 6px 2px rgba(0,0,0,0.3);
+            border: 1px solid #5f6368;
+        }
+        body.dark-mode .create-container input, 
+        body.dark-mode .create-container textarea {
+            background-color: transparent;
+            color: #e8eaed;
+        }
+        
+        body.dark-mode .note-card {
+            border: 1px solid #5f6368;
+            background-color: #202124;
+        }
+        body.dark-mode .note-card:hover {
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.6), 0 1px 3px 1px rgba(0,0,0,0.3);
+        }
+        
+        body.dark-mode .note-date, 
+        body.dark-mode .delete-btn { color: #9aa0a6; }
+        
+        body.dark-mode .delete-btn:hover {
+            background-color: #3c4043;
+            color: #f28b82; /* 다크모드용 경고 빨간색 */
+        }
+        
+        body.dark-mode .tool-install-btn {
+            border-color: #5f6368;
+            color: #8ab4f8; /* 다크모드용 파란색 */
+        }
+        body.dark-mode .tool-install-btn:hover { background-color: #3c4043; }
+        
+        body.dark-mode .dark-mode-btn {
+            border-color: #5f6368;
+            color: #e8eaed;
+        }
+        body.dark-mode .dark-mode-btn:hover { background-color: #3c4043; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">클립보드</div>
-        <div class="search-container">
-            <!-- 검색 요청은 추후 JS나 Form GET 요청으로 처리할 예정입니다. -->
-            <input type="text" id="searchInput" placeholder="검색...">
-        </div>
+        <form class="search-container" action="/" method="GET">
+            <input type="text" name="search" id="searchInput" placeholder="검색..." value="{{ search | default('') }}">
+            <button type="submit" class="search-btn">검색</button>
+        </form>
+        <button type="button" class="tool-install-btn" onclick="location.href='/tools'">도구 설치</button>
+        <button type="button" class="dark-mode-btn" id="darkModeBtn">다크모드</button>
+        <div class="caution-message">주의! 메모는 하루 지나면 자동 삭제됩니다.</div>
     </header>
 
     <main>
@@ -264,6 +385,29 @@
                 noteTitle.style.display = 'none';
                 formActions.style.display = 'none';
                 noteContent.rows = 1;
+            }
+        });
+
+        const darkModeBtn = document.getElementById('darkModeBtn');
+        const bodyTag = document.body;
+
+        // 브라우저 로컬 스토리지에서 이전 테마 설정 불러오기
+        if (localStorage.getItem('theme') === 'dark') {
+            bodyTag.classList.add('dark-mode');
+            darkModeBtn.innerText = '라이트모드';
+        }
+
+        // 다크모드 버튼 클릭 이벤트
+        darkModeBtn.addEventListener('click', function() {
+            bodyTag.classList.toggle('dark-mode');
+            
+            // 현재 상태에 따라 로컬 스토리지 값 및 버튼 텍스트 변경
+            if (bodyTag.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                darkModeBtn.innerText = '라이트모드';
+            } else {
+                localStorage.setItem('theme', 'light');
+                darkModeBtn.innerText = '다크모드';
             }
         });
     </script>

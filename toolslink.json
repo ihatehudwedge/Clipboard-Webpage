@@ -1,0 +1,23 @@
+{
+    "tools": [
+        {"name": "CFF_Explorer", "purpose":"파일 확인 및 에디터", "download": "https://ntcore.com/explorer-suite/", "etc": ""},
+        {"name": "DIE", "purpose":"파일 정적 분석 및 엔트로피 확인", "download": "https://github.com/horsicq/Detect-It-Easy?tab=readme-ov-file", "etc": ""},
+        {"name": "Frida", "purpose":"후킹", "download": "pip install frida-tools", "etc": "Python 라이브러리 설치"},
+        {"name": "Ghidra", "purpose":"디컴파일러", "download": "https://github.com/NationalSecurityAgency/ghidra", "etc": "JDK 설치 필요"},
+        {"name": "PEStudio", "purpose":"종합 정적 분석 도구", "download": "https://pestudio.en.lo4d.com/windows", "etc": ""},
+        {"name": "Procmon", "purpose":"프로세스 모니터링", "download": "https://learn.microsoft.com/ko-kr/sysinternals/downloads/procmon", "etc": ""},
+        {"name": "Process Explorer", "purpose":"작업관리자", "download": "https://learn.microsoft.com/ko-kr/sysinternals/downloads/process-explorer", "etc": ""},
+        {"name": "Autoruns", "purpose":"자동실행 탐지", "download": "https://learn.microsoft.com/ko-kr/sysinternals/downloads/autoruns", "etc": ""},
+        {"name": "TCPView", "purpose":"네트워크 모니터링", "download": "https://learn.microsoft.com/ko-kr/sysinternals/downloads/tcpview", "etc": ""},
+        {"name": "Windbg", "purpose":"동적 분석 및 덤프 분석", "download": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/", "etc": ""},
+        {"name": "x64DBG", "purpose":"리버싱", "download": "https://x64dbg.com/", "etc": ""},
+        {"name": "x64plgmnr", "purpose":"x64DBG 플러그인 관리", "download": "https://github.com/horsicq/x64dbg-Plugin-Manager", "etc": ""},
+        {"name": "CyberChef", "purpose":"인코딩 및 바이너리 번역", "download": "https://gchq.github.io/CyberChef/", "etc": "웹 및 포터블도 존재"},
+        {"name": "Scylla", "purpose":"x64DBG 언패킹", "download": "https://github.com/NtQuery/Scylla", "etc": ""},
+        {"name": "CheatEngine", "purpose":"실행 중 메모리 제어", "download": "https://www.cheatengine.org/", "etc": "꼭 VM에서만 설치! 애드웨어 위험!"},
+        {"name": "Sysinternals", "purpose":"MS 분석 도구 모음", "download": "https://learn.microsoft.com/ko-kr/sysinternals/downloads/", "etc": "주요 분석 도구 모음"},
+        {"name": "WinPrefetchView", "purpose":"윈도우 프리패치 파일 분석", "download": "https://www.nirsoft.net/utils/win_prefetch_view.html", "etc": ""},
+        {"name": "InjectedDLL", "purpose":"DLL 공격 여부 판단", "download": "https://www.nirsoft.net/utils/injected_dll.html", "etc": ""},
+        {"name": "DriverView", "purpose":"연결된 하드웨어 장치 정보 확인", "download": "https://www.nirsoft.net/utils/driverview.html", "etc": ""}
+    ]
+}

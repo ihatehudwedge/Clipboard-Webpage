@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>클립보드 서비스</title>
+    <style>
+        /* 기본 리셋 및 기존 헤더 스타일 재사용 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans KR', Arial, sans-serif; background-color: #ffffff; color: #202124; }
+        
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 24px; border-bottom: 1px solid #e0e0e0;
+            position: sticky; top: 0; background-color: white; z-index: 100;
+        }
+        .logo { font-size: 22px; font-weight: bold; color: #5f6368; }
+        
+        .home-btn {
+            background-color: transparent; border: 1px solid #dadce0; color: #1a73e8;
+            font-size: 14px; font-weight: bold; cursor: pointer;
+            padding: 8px 16px; border-radius: 4px; transition: 0.2s;
+            text-decoration: none;
+        }
+        .home-btn:hover { background-color: #f8f9fa; border-color: #d2e3fc; }
+
+        /* 메인 컨텐츠 및 테이블 스타일 */
+        main { padding: 32px 16px; max-width: 1000px; margin: 0 auto; }
+        h1 { font-size: 24px; margin-bottom: 24px; color: #202124; }
+
+        .tools-table-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden; /* 테두리 둥글게 깎기 위해 필요 */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #5f6368;
+        }
+        tr:last-child td { border-bottom: none; } /* 마지막 줄 테두리 제거 */
+        tr:hover { background-color: #f8f9fa; }
+
+        /* 다운로드 링크 및 명령어 코드 스타일 */
+        .download-link {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .download-link:hover { text-decoration: underline; }
+        
+        .cmd-code {
+            background-color: #f1f3f4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d93025;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">도구 설치</div>
+        <!-- 메인 페이지로 돌아가는 버튼 -->
+        <a href="/" class="home-btn">메인으로 돌아가기</a>
+    </header>
+
+    <main>
+        <h1>도구 목록</h1>
+        
+        <div class="tools-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>도구명</th>
+                        <th>용도</th>
+                        <th>다운로드 / 설치</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 파이썬에서 넘어온 tools 데이터를 반복 출력 -->
+                    {% for tool in tools %}
+                    <tr>
+                        <td style="font-weight: bold;">{{ tool.name }}</td>
+                        <td>{{ tool.purpose }}</td>
+                        <td>
+                            <!-- Jinja2 if문: http로 시작하면 링크, 아니면 코드로 표시 -->
+                            {% if tool.download.startswith('http') %}
+                                <a href="{{ tool.download }}" target="_blank" class="download-link">🔗 다운로드 페이지 이동</a>
+                            {% else %}
+                                <span class="cmd-code">{{ tool.download }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #5f6368; font-size: 14px;">{{ tool.etc }}</td>
+                    </tr>
+                    {% else %}
+                    <!-- 도구 데이터가 없을 경우 표시 -->
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 40px; color: #5f6368;">
+                            등록된 도구가 없습니다.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+</body>
+</html>

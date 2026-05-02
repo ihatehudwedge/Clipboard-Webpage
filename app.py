@@ -22,7 +22,7 @@ def clip_template(title:str, content:str):
     }
     return data
 
-def get_notes():
+def get_notes(search=None):
     notes = []
 
     # ./clip/ 폴더 내의 모든 .json 파일 경로를 가져옴
@@ -33,18 +33,28 @@ def get_notes():
             with open(path, 'r', encoding='utf-8') as f:
                 note_data = json.load(f)
 
-                note_date_str = note_data.get('date', '')
-                if note_date_str:
-                    note_date = datetime.strptime(note_date_str, '%Y-%m-%d %H:%M:%S')
-                    
-                    # 3. 작성일로부터 7일 이상 경과했는지 확인합니다.
-                    if time_now() - note_date >= timedelta(days=1):
-                        os.remove(path)
-                        continue
+            note_date_str = note_data.get('date', '')
+            title = note_data.get('title', '').lower()
+            content = note_data.get('content', '').lower()
 
-                # 7일이 지나지 않은 유효한 데이터만 리스트에 추가합니다.
-                note_data['filename'] = os.path.basename(path)
-                notes.append(note_data)
+            if note_date_str:
+                note_date = datetime.strptime(note_date_str, '%Y-%m-%d %H:%M:%S')
+                
+                if time_now() - note_date >= timedelta(days=1):
+                    os.remove(path)
+                    continue
+            
+            # 검색 기능
+            if search is not None:
+                keyword = search.lower()
+
+                # 제목과 내용 모두에 검색어가 포함되어 있지 않으면 리스트에 넣지 않고 스킵
+                if keyword not in title and keyword not in content:
+                    continue
+
+            # 7일이 지나지 않은 유효한 데이터만 리스트에 추가합니다.
+            note_data['filename'] = os.path.basename(path)
+            notes.append(note_data)
         except Exception as e:
             print(f"파일 읽기 오류 ({path}): {e}")
             
@@ -53,9 +63,33 @@ def get_notes():
 
     return notes
 
-@app.route('/')
+
+
+
+@app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html', notes=get_notes())
+    search_keyword = request.args.get('search')
+    if search_keyword is None:
+        return render_template('index.html', notes=get_notes())
+    return render_template('index.html', notes=get_notes(search_keyword), search=search_keyword)
+
+@app.route('/tools', methods=['GET'])
+def tools():
+    tools_data = []
+    
+    json_path = 'toolslink.json'
+    
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                # JSON 구조에서 'tools' 리스트만 추출합니다.
+                tools_data = data.get('tools', [])
+        except Exception as e:
+            print(f"도구 JSON 파일 읽기 오류: {e}")
+            
+    # tools.html 템플릿으로 tools 리스트를 넘겨줍니다.
+    return render_template('tools.html', tools=tools_data)
 
 
 @app.route('/add', methods=['POST'])
@@ -71,7 +105,7 @@ def add_note():
     filename = f"note_{time.time()}.json"
     filepath = os.path.join(CLIP_DIR, filename)
 
-    # 5. 지정된 경로에 데이터를 JSON 포맷의 텍스트로 저장합니다.
+    # 지정된 경로에 데이터를 JSON 포맷의 텍스트로 저장합니다.
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(clip_template(title, content), f, ensure_ascii=False, indent=4)
 
@@ -82,7 +116,6 @@ def add_note():
 def delete_note():
     # HTML 폼에서 전달받은 파일명
     filename = request.form.get('filename')
-    print(filename)
     
     if filename:
         # 보안을 위해 파일명에 폴더 이동 경로('..')가 없는지 확인 후 처리
@@ -100,4 +133,4 @@ def delete_note():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
